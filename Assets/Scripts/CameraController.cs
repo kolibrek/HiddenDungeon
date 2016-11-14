@@ -24,10 +24,6 @@ public class CameraController : MonoBehaviour {
         }
 	}
 
-    void SelectCamera(int cameraNum) {
-
-    }
-
     public int CurrentCamera() {
         return currentCamera;
     }
