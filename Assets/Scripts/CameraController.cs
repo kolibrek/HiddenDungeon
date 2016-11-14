@@ -3,17 +3,47 @@ using System.Collections;
 
 public class CameraController : MonoBehaviour {
 
-    public GameObject player;
+    public Camera TPSCamera;
+    public Camera FPSCamera;
 
-    new Camera camera;
+    private int currentCamera;
 
     // Use this for initialization
     void Start () {
-        camera = GetComponent<Camera>();
+        currentCamera = 0;
+        TPSCamera.enabled = true;
+        FPSCamera.enabled = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        this.transform.position = new Vector3(player.transform.position.x, 10f, player.transform.position.z - 10f);
+        TPSCamera.transform.position = new Vector3(this.transform.position.x, 10f, this.transform.position.z - 10f);
+
+        if (Input.GetKeyDown(KeyCode.V)) {
+            ToggleCamera();
+        }
 	}
+
+    void SelectCamera(int cameraNum) {
+
+    }
+
+    public int CurrentCamera() {
+        return currentCamera;
+    }
+
+    void ToggleCamera() {
+        switch(currentCamera) {
+            case 0:
+                currentCamera = 1;
+                FPSCamera.enabled = true;
+                TPSCamera.enabled = false;
+                return;
+            case 1:
+                currentCamera = 0;
+                TPSCamera.enabled = true;
+                FPSCamera.enabled = false;
+                return;
+        }
+    }
 }
