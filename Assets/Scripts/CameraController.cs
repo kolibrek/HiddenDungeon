@@ -3,8 +3,9 @@ using System.Collections;
 
 public class CameraController : MonoBehaviour {
 
-    public GameObject FPSController;
-    public GameObject TPSController;
+    public float cameraHeight = 8f;
+    public float cameraOffset = 4f;
+    public float cameraAngle = 45f;
 
     public Camera TPSCamera;
     public Camera FPSCamera;
@@ -14,53 +15,41 @@ public class CameraController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         currentCamera = 0;
-        FPSController.SetActive(false);
-        TPSController.SetActive(true);
-        //Debug.Log("FPS:" + FPSController.activeInHierarchy + " TPS: " + TPSController.activeInHierarchy);
-        //TPSCamera.enabled = true;
-        //FPSCamera.enabled = false;
+        FPSCamera.enabled = false;
+        TPSCamera.enabled = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (TPSController.activeInHierarchy) {
-            this.transform.position = TPSController.transform.position;
-            this.transform.rotation = TPSController.transform.rotation;
+
+        TPSCamera.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + cameraHeight, this.transform.position.z - cameraOffset);
+
+        if (cameraAngle != TPSCamera.transform.rotation.eulerAngles.x) {
+            TPSCamera.transform.rotation = Quaternion.Euler(cameraAngle, 0, 0);
         }
-        if (FPSController.activeInHierarchy) {
-            this.transform.position = FPSController.transform.position;
-            this.transform.rotation = FPSController.transform.rotation;
-        }
-        TPSCamera.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + 4f, this.transform.position.z - 2f);
 
         if (Input.GetKeyDown(KeyCode.V)) {
-            //Debug.Log("Switching Controllers!");
-            Debug.Log("FPS:" + FPSController.activeInHierarchy + " TPS: " + TPSController.activeInHierarchy);
             ToggleController();
         }
 	}
 
+    // return 0 for Third-Person view and 1 for First-Person view;
     public int CurrentCamera() {
         return currentCamera;
     }
 
+    // Switches between First-Person and Third-Person views.
     void ToggleController() {
         switch(currentCamera) {
             case 0:
                 currentCamera = 1;
+                FPSCamera.enabled = true;
                 TPSCamera.enabled = false;
-                TPSController.SetActive(false);
-                FPSController.SetActive(true);
-                FPSController.transform.position = transform.position + Vector3.up;
-                FPSController.transform.rotation = transform.rotation;
                 return;
             case 1:
                 currentCamera = 0;
                 TPSCamera.enabled = true;
-                FPSController.SetActive(false);
-                TPSController.SetActive(true);
-                TPSController.transform.position = transform.position + Vector3.down;
-                TPSController.transform.rotation = transform.rotation;
+                FPSCamera.enabled = false;
                 return;
         }
     }
