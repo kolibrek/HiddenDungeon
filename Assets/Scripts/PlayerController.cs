@@ -8,18 +8,18 @@ public class PlayerController : MonoBehaviour {
     public float jumpForce = 80f;
     public float gravityMult = 1f;
 
+    private bool isGrounded = false;
+
     Rigidbody rb;
-    CharacterController cc;
+    //CharacterController cc;
     CameraController cameraControl;
     MouseLook mouseLook;
     Vector3 targetVelocity = Vector3.zero;
-    private CollisionFlags m_CollisionFlags;
-
 
     // Use this for initialization
     void Start () {
         rb = GetComponent<Rigidbody>();
-        cc = GetComponent<CharacterController>();
+        //cc = GetComponent<CharacterController>();
         mouseLook = GetComponent<MouseLook>();
         cameraControl = GetComponent<CameraController>();
         mouseLook.Init(this.transform, cameraControl.FPSCamera.transform);
@@ -29,44 +29,38 @@ public class PlayerController : MonoBehaviour {
 	void Update () {
         Vector2 kInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         Vector2 mInput = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        //targetVelocity = Vector3.zero;
-
+        targetVelocity = rb.velocity;
+        float fallSpeed = targetVelocity.y;
+        
         // Third-Person view
         if (cameraControl.CurrentCamera() == 0) {
-            targetVelocity = new Vector3(kInput.x, 0, kInput.y);
-            targetVelocity.Normalize();
-
-            
+            targetVelocity.x = kInput.x * runSpeed;
+            targetVelocity.z = kInput.y * runSpeed;
         }
         // First-Person view
         if (cameraControl.CurrentCamera() == 1) {
-            targetVelocity = transform.right * kInput.x + transform.forward * kInput.y;
-            targetVelocity.Normalize();
-
             mouseLook.LookRotation(this.transform, cameraControl.FPSCamera.transform);
+
+            targetVelocity = transform.forward * kInput.y * runSpeed + transform.right * kInput.x * runSpeed;
+            targetVelocity.y = fallSpeed;
         }
-
-        targetVelocity *= runSpeed;
-
         
-
-        if (cc.isGrounded) {
-            targetVelocity.y = 0;
+        if (isGrounded) {
             if (Input.GetButtonDown("Jump")) {
-                targetVelocity.y += jumpForce;
+                targetVelocity.y = jumpForce;
             }
         }
-        
+
         rb.velocity = (targetVelocity);
     }
 
     void OnCollisionEnter(Collision collision) {
-        Rigidbody body = collision.collider.attachedRigidbody;
-        Debug.Log("hit " + body.name);
-    }
-
-    private void OnControllerColliderHit(ControllerColliderHit hit) {
-        Rigidbody body = hit.collider.attachedRigidbody;
-        
+        if (collision.collider.tag == "Floor") {
+            isGrounded = true;
+        }
+        if (collision.collider.GetComponent<Rigidbody>()) {
+            Rigidbody body = collision.collider.GetComponent<Rigidbody>();
+            Debug.Log("hit " + body.name);
+        }
     }
 }
